@@ -23,8 +23,14 @@ def create_app():
 
     # --- Heroku 배포를 위한 데이터베이스 경로 설정 ---
     # Heroku에서 DB_PATH 환경 변수가 설정되어 있으면 그 경로를 사용하고,
-    # 그렇지 않으면 로컬 경로를 사용합니다.
+    # 그렇지 않으면 Heroku의 /tmp 디렉토리에 db 파일을 생성하도록 합니다.
     db_path = os.environ.get('DB_PATH', f'sqlite:///{os.path.join(basedir, "instance", "app.db")}')
+    
+    # Heroku에서 DB_PATH가 설정되지 않았다면, /tmp/app.db로 설정
+    # Heroku는 /tmp 디렉토리에만 쓰기 권한을 부여합니다.
+    if 'DB_PATH' not in os.environ:
+        db_path = 'sqlite:////tmp/app.db'
+    
     app.config['SQLALCHEMY_DATABASE_URI'] = db_path
     # ---------------------------------------------
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
