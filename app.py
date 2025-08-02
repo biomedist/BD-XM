@@ -154,8 +154,8 @@ def create_app():
 
     return app
 
-# 이 부분은 Gunicorn이 앱을 실행하는 entry point입니다.
- app = create_app()
+# Gunicorn이 이 파일을 실행하는 entry point입니다.
+app = create_app()
 
 # 로컬 개발 환경에서만 app.run()이 실행됩니다.
 if __name__ == '__main__':
