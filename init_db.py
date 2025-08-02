@@ -1,7 +1,19 @@
 # init_db.py
 
-from app import create_app, db
+from app import create_app
+from extensions import db
 from models import init_db_data
+import os
+
+# Heroku 환경에서 데이터베이스 경로를 /tmp 디렉토리로 설정
+if os.getenv('DYNO'):
+    db_path = 'sqlite:////tmp/app.db'
+    os.environ['SQLALCHEMY_DATABASE_URI'] = db_path
+else:
+    # 로컬 환경에서는 기존 경로 사용
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    db_path = f'sqlite:///{os.path.join(basedir, "instance", "app.db")}'
+    os.environ['SQLALCHEMY_DATABASE_URI'] = db_path
 
 # Flask 앱을 생성합니다.
 app = create_app()
