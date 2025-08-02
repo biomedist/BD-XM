@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}뇌사XMatch알리미 - 메인{% endblock %}
+
+{% block content %}
+    <h1>다음 X-Match 근무자</h1>
+    <p>현재 날짜: {{ "2025년 7월 30일" }}</p>
+    <div class="next-workers-info">
+        {% if next_workers %}
+            <p><strong>{{ next_workers[0] }}</strong> 님</p>
+            {% if next_workers|length > 1 %}
+                <p><strong>{{ next_workers[1] }}</strong> 님</p>
+            {% endif %}
+        {% else %}
+            <p>다음 근무자가 없습니다. 모든 근무자가 OFF 상태이거나 등록되지 않았습니다.</p>
+        {% endif %}
+    </div>
+
+    <h2>근무자 관리</h2>
+    <p><a href="{{ url_for('workers') }}">근무자 목록 보기 및 관리</a></p>
+
+    <form action="{{ url_for('next_duty') }}" method="POST">
+        <button type="submit">다음 근무 순번으로 넘기기</button>
+    </form>
+{% endblock %}

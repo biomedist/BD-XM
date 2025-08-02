@@ -1,0 +1,145 @@
+/* static/css/style.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background-color: #007BFF;
+    color: white;
+    padding: 1em 0;
+    text-align: center;
+}
+
+header nav a {
+    color: white;
+    margin: 0 10px;
+    text-decoration: none;
+}
+
+main {
+    padding: 20px;
+    max-width: 800px;
+    margin: 20px auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    background-color: #eee;
+    color: #666;
+}
+
+h1, h2 {
+    color: #007BFF;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+form input[type="text"] {
+    padding: 8px;
+    margin-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+form button {
+    padding: 8px 15px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #218838;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+ul li {
+    background-color: #f9f9f9;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+ul li a {
+    color: #dc3545;
+    text-decoration: none;
+    font-size: 0.9em;
+}
+
+ul li a:hover {
+    text-decoration: underline;
+}
+
+.next-workers-info {
+    background-color: #e9f7ef;
+    border: 1px solid #d4edda;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.next-workers-info strong {
+    font-size: 1.2em;
+    color: #28a745;
+}
+
+/* 드래그 가능한 항목에 대한 커서 */
+.worker-item {
+    cursor: grab; /* 드래그 가능한 아이템에 손 모양 커서 */
+    transition: background-color 0.2s ease; /* 부드러운 전환 효과 */
+}
+
+.worker-item:active {
+    cursor: grabbing; /* 드래그 중일 때 잡는 손 모양 커서 */
+}
+
+/* OFF 상태인 근무자 스타일 */
+.worker-item.off-duty {
+    background-color: #ffe0e0; /* 옅은 빨간색 배경 */
+    color: #8b0000; /* 어두운 빨간색 텍스트 */
+    text-decoration: line-through; /* 취소선 */
+    opacity: 0.7; /* 약간 투명하게 */
+}
+
+/* 토글 버튼 스타일 */
+.toggle-off-btn {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8em;
+}
+
+/* OFF 설정 버튼 */
+.toggle-off-btn[data-is-off="false"] {
+    background-color: #ffc107; /* 주황색 */
+    color: #333;
+}
+
+/* OFF 해제 버튼 */
+.toggle-off-btn[data-is-off="true"] {
+    background-color: #17a2b8; /* 청록색 */
+    color: white;
+}
