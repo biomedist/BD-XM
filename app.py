@@ -21,8 +21,12 @@ def create_app():
     # Flask 애플리케이션을 생성합니다.
     app = Flask(__name__)
 
-    # 애플리케이션 설정을 로드합니다.
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance', 'app.db')
+    # --- Heroku 배포를 위한 데이터베이스 경로 설정 ---
+    # Heroku에서 DB_PATH 환경 변수가 설정되어 있으면 그 경로를 사용하고,
+    # 그렇지 않으면 로컬 경로를 사용합니다.
+    db_path = os.environ.get('DB_PATH', f'sqlite:///{os.path.join(basedir, "instance", "app.db")}')
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_path
+    # ---------------------------------------------
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # db 객체를 Flask 애플리케이션에 연결합니다.
