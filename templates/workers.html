@@ -117,21 +117,21 @@
     {% if workers %}
         <ul id="worker-list">
             {% for worker in workers %}
-                <li data-id="{{ worker.id }}" class="worker-item {% if worker.is_off %}off-duty{% endif %}">
-                    {{ worker.name }}
-                    {% if worker.is_off %} (OFF) {% endif %}
-                    <span>
-                        <button class="toggle-off-btn" data-id="{{ worker.id }}" data-is-off="{{ worker.is_off | tojson }}">
-                            {% if worker.is_off %} OFF 해제 {% else %} OFF 설정 {% endif %}
-                        </button>
-                        <!-- IMPORTANT: For production, replace this 'confirm' with a custom modal UI. -->
-                        <a href="{{ url_for('delete_worker', id=worker.id) }}"
-                           onclick="return confirm('{{ worker.name }} 님을 삭제하시겠습니까?');">
-                            [삭제]
-                        </a>
-                    </span>
-                </li>
-            {% endfor %}
+            <li data-id="{{ worker.id }}" class="worker-item {% if worker.is_off %}off-duty{% endif %}">
+                {{ worker.name }}
+                {% if worker.is_off %} (OFF) {% endif %}
+                <span>
+                    <button class="toggle-off-btn" data-id="{{ worker.id }}" data-is-off="{{ worker.is_off | tojson }}">
+                        {% if worker.is_off %} OFF 해제 {% else %} OFF 설정 {% endif %}
+                    </button>
+                    <!-- 이 부분을 수정합니다: 'id'를 'worker_id'로 변경 -->
+                    <a href="{{ url_for('delete_worker', worker_id=worker.id) }}"
+                       onclick="return confirm('{{ worker.name }} 님을 삭제하시겠습니까?');">
+                        [삭제]
+                    </a>
+                </span>
+            </li>
+        {% endfor %}
         </ul>
     {% else %}
         <p>등록된 근무자가 없습니다.</p>
