@@ -43,19 +43,23 @@ class Worker(db.Model):
 # 초기 데이터가 필요한 경우 여기에 추가할 수 있습니다.
 # ====================================================================
 with app.app_context():
-    db.create_all()
-    # 초기 데이터 삽입 예시 (필요한 경우 주석 해제 후 사용)
-    # 앱이 처음 실행될 때 Worker 테이블에 데이터가 없는 경우에만 삽입합니다.
-    # if Worker.query.count() == 0:
-    #     workers_data = [
-    #         Worker(name='김철수', is_off=False, last_duty_date=date(2025, 7, 30), duty_count=5, order_index=1),
-    #         Worker(name='이영희', is_off=False, last_duty_date=date(2025, 7, 29), duty_count=6, order_index=2),
-    #         Worker(name='박민수', is_off=False, last_duty_date=date(2025, 7, 28), duty_count=7, order_index=3),
-    #         Worker(name='최유리', is_off=False, last_duty_date=date(2025, 7, 31), duty_count=4, order_index=4),
-    #     ]
-    #     db.session.add_all(workers_data)
-    #     db.session.commit()
-
+    db.create_all()  # 초기 데이터 삽입 예시 (이 부분을 주석 해제하여 사용)
+    if Worker.query.count() == 0: # Worker 테이블에 데이터가 없는 경우에만 삽입
+        workers_data = [
+            Worker(name='양성식', is_off=False, last_duty_date=date(2025, 7, 30), duty_count=5, order_index=1),
+            Worker(name='조영은', is_off=False, last_duty_date=date(2025, 7, 29), duty_count=6, order_index=2),
+            Worker(name='엄진석', is_off=False, last_duty_date=date(2025, 7, 28), duty_count=7, order_index=3),
+            Worker(name='박성희', is_off=False, last_duty_date=date(2025, 7, 31), duty_count=4, order_index=4),
+            Worker(name='이규환', is_off=False, last_duty_date=date(2025, 7, 31), duty_count=4, order_index=5),
+            Worker(name='전소현', is_off=False, last_duty_date=date(2025, 7, 31), duty_count=4, order_index=6),
+            Worker(name='박선영', is_off=False, last_duty_date=date(2025, 7, 31), duty_count=4, order_index=7),
+            Worker(name='이하늘', is_off=False, last_duty_date=date(2025, 7, 31), duty_count=4, order_index=8),
+            Worker(name='이광호', is_off=False, last_duty_date=date(2025, 7, 31), duty_count=4, order_index=9),
+            Worker(name='김미란', is_off=False, last_duty_date=date(2025, 7, 31), duty_count=4, order_index=10),
+        ]
+        db.session.add_all(workers_data)
+        db.session.commit()
+  
 # ====================================================================
 # 핵심 로직 함수: 다음 근무자 선정 로직 (로그에서 오류가 발생했던 부분)
 # ====================================================================
