@@ -1,25 +1,119 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BD_XMatch_app</title>
 
-{% block title %}뇌사XMatch알리미 - 메인{% endblock %}
+    <!--
+        CSS 파일 연결:
+        프로젝트 루트의 'static' 폴더 안에 'css' 폴더가 있고 그 안에 'style.css' 파일이 있다면
+        아래와 같이 연결합니다.
+    -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
-{% block content %}
-    <h1>다음 X-Match 근무자</h1>
-    <p>현재 날짜: {{ "2025년 7월 30일" }}</p>
-    <div class="next-workers-info">
-        {% if next_workers %}
-            <p><strong>{{ next_workers[0] }}</strong> 님</p>
-            {% if next_workers|length > 1 %}
-                <p><strong>{{ next_workers[1] }}</strong> 님</p>
+    <!--
+        인라인 스타일 (선택 사항):
+        style.css 파일에 모든 스타일을 정의하는 것이 좋지만,
+        간단한 스타일은 여기에 직접 작성할 수도 있습니다.
+        만약 style.css에 동일한 내용이 있다면 이 부분은 제거해도 됩니다.
+    -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #e9ecef;
+            margin-bottom: 10px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            border-left: 5px solid #007bff;
+            font-size: 1.1em;
+        }
+        li:last-child {
+            margin-bottom: 0;
+        }
+        .info-text {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            margin-top: 20px;
+        }
+        .navigation-link {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .navigation-link:hover {
+            background-color: #218838;
+        }
+        .logo {
+            display: block;
+            margin: 0 auto 20px;
+            max-width: 150px; /* 이미지 크기 조절 */
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!--
+            이미지 파일 연결 (예시):
+            프로젝트 루트의 'static' 폴더 안에 'images' 폴더가 있고
+            그 안에 'logo.png' 파일이 있다면 아래와 같이 연결합니다.
+            실제 이미지 파일명과 경로에 맞게 수정하세요.
+        -->
+        <!-- <img src="{{ url_for('static', filename='images/logo.png') }}" alt="앱 로고" class="logo"> -->
+
+        <h1>BD_XMatch_app이 정상 작동 중입니다!</h1>
+
+        <p class="info-text">다음 근무자:</p>
+        <ul>
+            {% if next_workers %}
+                {% for worker in next_workers %}
+                    <li>{{ worker.name }} (마지막 근무일: {{ worker.last_duty_date | default('N/A') }})</li>
+                {% endfor %}
+            {% else %}
+                <li>근무 가능한 작업자가 없습니다.</li>
             {% endif %}
-        {% else %}
-            <p>다음 근무자가 없습니다. 모든 근무자가 OFF 상태이거나 등록되지 않았습니다.</p>
-        {% endif %}
+        </ul>
+
+        <a href="{{ url_for('list_workers') }}" class="navigation-link">모든 작업자 목록 보기</a>
     </div>
 
-    <h2>근무자 관리</h2>
-    <p><a href="{{ url_for('workers') }}">근무자 목록 보기 및 관리</a></p>
-
-    <form action="{{ url_for('next_duty') }}" method="POST">
-        <button type="submit">다음 근무 순번으로 넘기기</button>
-    </form>
-{% endblock %}
+    <!--
+        JavaScript 파일 연결:
+        프로젝트 루트의 'static' 폴더 안에 'js' 폴더가 있고 그 안에 'script.js' 파일이 있다면
+        아래와 같이 연결합니다.
+        JavaScript 코드는 보통 </body> 태그 직전에 배치하여 페이지 로딩 속도를 향상시킵니다.
+    -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

@@ -45,6 +45,7 @@ class Worker(db.Model):
 with app.app_context():
     db.create_all()
     # 초기 데이터 삽입 예시 (필요한 경우 주석 해제 후 사용)
+    # 앱이 처음 실행될 때 Worker 테이블에 데이터가 없는 경우에만 삽입합니다.
     # if Worker.query.count() == 0:
     #     workers_data = [
     #         Worker(name='김철수', is_off=False, last_duty_date=date(2025, 7, 30), duty_count=5, order_index=1),
@@ -87,13 +88,15 @@ def get_next_duty_workers_logic():
 def index():
     # get_next_duty_workers_logic 함수 호출
     next_workers = get_next_duty_workers_logic()
-    return f"<h1>BD_XMatch_app is running!</h1><p>Next workers: {[w.name for w in next_workers]}</p>"
+    # 'index.html' 템플릿을 렌더링하고, next_workers 데이터를 전달합니다.
+    return render_template('index.html', next_workers=next_workers)
 
 # 추가 라우트 (예시: 모든 작업자 목록 보기)
 @app.route('/workers')
 def list_workers():
     workers = Worker.query.order_by(Worker.order_index).all()
-    return render_template('workers.html', workers=workers) # 'workers.html' 템플릿이 필요합니다.
+    # 'workers.html' 템플릿을 렌더링하고, workers 데이터를 전달합니다.
+    return render_template('workers.html', workers=workers)
 
 # ====================================================================
 # 앱 실행
