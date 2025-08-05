@@ -1,162 +1,102 @@
-# app.py
-
-from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
-from datetime import datetime
+from flask import Flask, render_template, request, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime, date
 
-# models.py에서 Worker 모델과 초기 데이터 주입 함수를 임포트합니다.
-# models.py는 db 객체를 직접 참조하지 않도록 수정되어야 합니다.
-from models import Worker, init_db_data
+# Flask 애플리케이션 초기화
+app = Flask(__name__)
 
-# extensions.py에서 db 객체를 임포트합니다.
-# 이 db 객체는 아직 어떤 Flask 앱에도 연결되지 않은 상태입니다.
-from extensions import db
+# 데이터베이스 설정
+# Heroku 환경에서는 DATABASE_URL 환경 변수를 사용하고,
+# 로컬 환경에서는 SQLite 데이터베이스 파일을 사용합니다.
+if 'DATABASE_URL' in os.environ:
+    # Heroku PostgreSQL 연결을 위해 'postgresql://' 스키마를 'postgresql+psycopg2://'로 변경
+    # Heroku의 DATABASE_URL은 'postgres://'로 시작할 수 있으므로, SQLAlchemy 1.4+ 호환을 위해 변경 필요
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL'].replace("://", "ql://", 1)
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 
-# 애플리케이션 팩토리(Application Factory) 함수를 정의합니다.
-# 이 함수는 Flask 앱 인스턴스를 생성하고 모든 설정을 완료합니다.
-def create_app():
-    # 현재 파일의 디렉토리 경로를 설정합니다.
-    basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # SQLAlchemy 이벤트 추적 비활성화 (권장)
 
-    # Flask 애플리케이션을 생성합니다.
-    app = Flask(__name__)
+# SQLAlchemy 객체 초기화
+db = SQLAlchemy(app)
 
-    # --- Heroku 배포를 위한 데이터베이스 경로 설정 ---
-    # Heroku에서 DB_PATH 환경 변수가 설정되어 있으면 그 경로를 사용하고,
-    # 그렇지 않으면 Heroku의 /tmp 디렉토리에 db 파일을 생성하도록 합니다.
+# ====================================================================
+# 데이터베이스 모델 정의
+# 'worker' 테이블에 해당하는 Worker 모델을 정의합니다.
+# ====================================================================
+class Worker(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    is_off = db.Column(db.Boolean, default=False)
+    last_duty_date = db.Column(db.Date, nullable=True)
+    duty_count = db.Column(db.Integer, default=0)
+    order_index = db.Column(db.Integer, default=0) # 순서 유지를 위한 인덱스
+
+    def __repr__(self):
+        return f'<Worker {self.name}>'
+
+# ====================================================================
+# 데이터베이스 테이블 생성 및 초기 데이터 삽입
+# 앱 컨텍스트 내에서 db.create_all()을 호출하여 테이블을 생성합니다.
+# Heroku에 처음 배포할 때 테이블이 없으면 생성됩니다.
+# 초기 데이터가 필요한 경우 여기에 추가할 수 있습니다.
+# ====================================================================
+with app.app_context():
+    db.create_all()
+    # 초기 데이터 삽입 예시 (필요한 경우 주석 해제 후 사용)
+    # if Worker.query.count() == 0:
+    #     workers_data = [
+    #         Worker(name='김철수', is_off=False, last_duty_date=date(2025, 7, 30), duty_count=5, order_index=1),
+    #         Worker(name='이영희', is_off=False, last_duty_date=date(2025, 7, 29), duty_count=6, order_index=2),
+    #         Worker(name='박민수', is_off=False, last_duty_date=date(2025, 7, 28), duty_count=7, order_index=3),
+    #         Worker(name='최유리', is_off=False, last_duty_date=date(2025, 7, 31), duty_count=4, order_index=4),
+    #     ]
+    #     db.session.add_all(workers_data)
+    #     db.session.commit()
+
+# ====================================================================
+# 핵심 로직 함수: 다음 근무자 선정 로직 (로그에서 오류가 발생했던 부분)
+# ====================================================================
+def get_next_duty_workers_logic():
+    # 근무 가능한(is_off=False) 모든 작업자를 가져옵니다.
+    # order_index 순서로 정렬합니다.
+    available_workers = Worker.query.filter_by(is_off=False).order_by(Worker.order_index).all()
+
+    if not available_workers:
+        return [] # 근무 가능한 작업자가 없으면 빈 리스트 반환
+
+    # 여기서는 가장 간단한 로직으로, order_index가 가장 낮은 작업자를 반환합니다.
+    # 실제 앱의 "다음 근무자 선정 로직"에 따라 이 부분을 수정해야 합니다.
+    # 예를 들어, last_duty_date, duty_count 등을 고려하여 복잡한 로직을 구현할 수 있습니다.
     
-    # DB_PATH 환경 변수가 설정되어 있는지 확인
-    if 'DB_PATH' in os.environ:
-        db_path = os.environ.get('DB_PATH')
-    else:
-        # 로컬 환경에서는 instance 폴더에, Heroku 환경에서는 /tmp/app.db에 저장
-        # os.getenv('DYNO')는 Heroku에서 실행될 때만 값이 존재합니다.
-        if os.getenv('DYNO'):
-            db_path = 'sqlite:////tmp/app.db'
-        else:
-            db_path = f'sqlite:///{os.path.join(basedir, "instance", "app.db")}'
-    
-    app.config['SQLALCHEMY_DATABASE_URI'] = db_path
-    # ---------------------------------------------
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # 예시: 가장 오래 쉬었거나, 근무 횟수가 가장 적은 사람을 선정하는 로직 (주석 처리됨)
+    # available_workers.sort(key=lambda w: (w.last_duty_date if w.last_duty_date else date.min, w.duty_count))
+    # next_worker = available_workers[0]
+    # return [next_worker]
 
-    # db 객체를 Flask 애플리케이션에 연결합니다.
-    db.init_app(app)
+    # 현재는 단순히 order_index 순서대로 반환
+    return available_workers
 
-    # --- 다음 근무 순번 관리 로직 ---
-    # 실제 서비스에서는 DB에 저장하여 서버가 재시작되어도 유지되도록 해야 합니다.
-    # 여기서는 예시를 위해 메모리 변수를 사용합니다.
-    # 주의: 이 current_duty_start_index는 앱이 재시작되면 초기화됩니다.
-    # 실제 배포 시에는 DB에 저장하거나, last_duty_date 등을 활용하여 순번을 계산해야 합니다.
-    app.current_duty_start_index = 0
 
-    def get_next_duty_workers_logic():
-        # 활성화된 (OFF가 아닌) 근무자들을 order_index 순으로 정렬하여 가져옵니다.
-        available_workers = Worker.query.filter_by(is_off=False).order_by(Worker.order_index).all()
-        if not available_workers:
-            return []
-        num_available = len(available_workers)
-        next_two_workers_names = []
-        for i in range(2):
-            if num_available == 0:
-                break
-            worker_idx = (app.current_duty_start_index + i) % num_available
-            next_two_workers_names.append(available_workers[worker_idx].name)
-        return next_two_workers_names
+# ====================================================================
+# 라우트 정의
+# ====================================================================
 
-    def advance_duty_order_logic():
-        available_workers = Worker.query.filter_by(is_off=False).order_by(Worker.order_index).all()
-        num_available = len(available_workers)
-        if num_available > 0:
-            with app.app_context():
-                for i in range(2):
-                    if (app.current_duty_start_index + i) < num_available:
-                        worker_to_update_idx = (app.current_duty_start_index + i) % num_available
-                        worker_to_update = available_workers[worker_to_update_idx]
-                        worker_to_update.last_duty_date = datetime.now()
-                        worker_to_update.duty_count += 1
-                db.session.commit()
-            app.current_duty_start_index = (app.current_duty_start_index + 2) % num_available
-            print(f"근무 순번이 다음으로 넘어갔습니다. 새 시작 인덱스: {app.current_duty_start_index}")
-        else:
-            print("근무 가능한 인원이 없어 순번을 넘길 수 없습니다.")
+@app.route('/')
+def index():
+    # get_next_duty_workers_logic 함수 호출
+    next_workers = get_next_duty_workers_logic()
+    return f"<h1>BD_XMatch_app is running!</h1><p>Next workers: {[w.name for w in next_workers]}</p>"
 
-    # --- 라우트 정의 ---
+# 추가 라우트 (예시: 모든 작업자 목록 보기)
+@app.route('/workers')
+def list_workers():
+    workers = Worker.query.order_by(Worker.order_index).all()
+    return render_template('workers.html', workers=workers) # 'workers.html' 템플릿이 필요합니다.
 
-    @app.route('/')
-    def index():
-        next_workers = get_next_duty_workers_logic()
-        return render_template('index.html', next_workers=next_workers)
-
-    @app.route('/workers', methods=['GET', 'POST'])
-    def workers():
-        if request.method == 'POST':
-            worker_name = request.form['name']
-            if worker_name:
-                max_order_index = db.session.query(db.func.max(Worker.order_index)).scalar()
-                new_order_index = (max_order_index if max_order_index is not None else -1) + 1
-                new_worker = Worker(name=worker_name, order_index=new_order_index)
-                db.session.add(new_worker)
-                db.session.commit()
-            return redirect(url_for('workers'))
-        
-        all_workers = Worker.query.order_by(Worker.order_index).all()
-        return render_template('workers.html', workers=all_workers)
-
-    @app.route('/delete_worker/<int:id>')
-    def delete_worker(id):
-        worker_to_delete = Worker.query.get_or_404(id)
-        db.session.delete(worker_to_delete)
-        db.session.commit()
-        return redirect(url_for('workers'))
-
-    @app.route('/update_worker_order', methods=['POST'])
-    def update_worker_order():
-        data = request.get_json()
-        new_order_ids = data.get('order')
-        if not new_order_ids:
-            return jsonify({'success': False, 'message': '순서 데이터가 없습니다.'}), 400
-        try:
-            with db.session.begin_nested():
-                for index, worker_id_str in enumerate(new_order_ids):
-                    worker_id = int(worker_id_str)
-                    worker = Worker.query.get(worker_id)
-                    if worker:
-                        worker.order_index = index
-                    else:
-                        raise ValueError(f"ID {worker_id}를 가진 근무자를 찾을 수 없습니다.")
-                db.session.commit()
-            return jsonify({'success': True})
-        except Exception as e:
-            db.session.rollback()
-            print(f"순서 업데이트 중 오류 발생: {e}")
-            return jsonify({'success': False, 'message': str(e)}), 500
-
-    @app.route('/toggle_off_worker/<int:worker_id>', methods=['POST'])
-    def toggle_off_worker(worker_id):
-        worker = Worker.query.get_or_404(worker_id)
-        data = request.get_json()
-        if 'is_off' not in data or not isinstance(data['is_off'], bool):
-            return jsonify({'success': False, 'message': '잘못된 is_off 값입니다.'}), 400
-        worker.is_off = data['is_off']
-        try:
-            db.session.commit()
-            return jsonify({'success': True, 'is_off': worker.is_off})
-        except Exception as e:
-            db.session.rollback()
-            print(f"OFF 상태 토글 중 오류 발생: {e}")
-            return jsonify({'success': False, 'message': str(e)}), 500
-
-    @app.route('/next_duty', methods=['POST'])
-    def next_duty():
-        advance_duty_order_logic()
-        return redirect(url_for('index'))
-
-    return app
-
-# Gunicorn이 이 파일을 실행하는 entry point입니다.
-app = create_app()
-
-# 로컬 개발 환경에서만 app.run()이 실행됩니다.
+# ====================================================================
+# 앱 실행
+# ====================================================================
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True) # 로컬 개발 시 디버그 모드 활성화
