@@ -2,6 +2,108 @@
 
 {% block title %}뇌사XMatch알리미 - 근무자 관리{% endblock %}
 
+{% block head %}
+    {{ super() }}
+    <!-- workers.html에만 필요한 추가 스타일 -->
+    <style>
+        /* 이 스타일은 static/css/style.css 파일로 옮기는 것을 권장합니다. */
+        h2 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        form input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        form button[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        form button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        #worker-list {
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #fcfcfc;
+        }
+        .worker-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            margin-bottom: 8px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            cursor: grab; /* 드래그 가능함을 나타냄 */
+            transition: background-color 0.2s ease;
+        }
+        .worker-item:hover {
+            background-color: #f9f9f9;
+        }
+        .worker-item.off-duty {
+            background-color: #ffe0b2; /* OFF 상태 배경색 */
+            border-left: 5px solid #ff9800; /* OFF 상태 강조 */
+            color: #555;
+        }
+        .worker-item span {
+            display: flex;
+            gap: 10px;
+        }
+        .worker-item button, .worker-item a {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: background-color 0.2s ease;
+        }
+        .toggle-off-btn {
+            background-color: #17a2b8; /* 정보성 색상 */
+            color: white;
+        }
+        .toggle-off-btn:hover {
+            background-color: #138496;
+        }
+        .worker-item a {
+            background-color: #dc3545; /* 위험 색상 */
+            color: white;
+        }
+        .worker-item a:hover {
+            background-color: #c82333;
+        }
+        .back-to-main {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .back-to-main:hover {
+            background-color: #5a6268;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
     <h1>근무자 관리</h1>
 
@@ -22,6 +124,7 @@
                         <button class="toggle-off-btn" data-id="{{ worker.id }}" data-is-off="{{ worker.is_off | tojson }}">
                             {% if worker.is_off %} OFF 해제 {% else %} OFF 설정 {% endif %}
                         </button>
+                        <!-- IMPORTANT: For production, replace this 'confirm' with a custom modal UI. -->
                         <a href="{{ url_for('delete_worker', id=worker.id) }}"
                            onclick="return confirm('{{ worker.name }} 님을 삭제하시겠습니까?');">
                             [삭제]
@@ -34,8 +137,10 @@
         <p>등록된 근무자가 없습니다.</p>
     {% endif %}
 
-    <p><a href="{{ url_for('index') }}">메인 페이지로 돌아가기</a></p>
+    <p><a href="{{ url_for('index') }}" class="back-to-main">메인 페이지로 돌아가기</a></p>
 
+    <!-- SortableJS 라이브러리 (CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+    <!-- 커스텀 JavaScript 파일 -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 {% endblock %}

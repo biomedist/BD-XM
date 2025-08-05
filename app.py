@@ -112,7 +112,8 @@ def workers():
 def toggle_off_worker(worker_id):
     worker = Worker.query.get_or_404(worker_id)
     worker.is_off = not worker.is_off
-    # is_off 상태 변경 시 last_duty_date는 업데이트하지 않습니다.
+    
+    # OFF 설정 시 last_duty_date를 업데이트하지 않습니다.
     # last_duty_date는 실제로 근무를 수행했을 때만 업데이트됩니다.
     db.session.commit()
     return jsonify(success=True, is_off=worker.is_off)

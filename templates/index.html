@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BD_XMatch_app</title>
 
-    <!--
-        CSS 파일 연결:
-        프로젝트 루트의 'static' 폴더 안에 'css' 폴더가 있고 그 안에 'style.css' 파일이 있다면
-        아래와 같이 연결합니다.
-    -->
+    <!-- CSS 파일 연결 -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <!-- 인라인 스타일 (필요시 사용) -->
     <style>
+        /* 이 스타일은 static/css/style.css 파일로 옮기는 것을 권장합니다. */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -110,7 +107,14 @@
         <ul>
             {% if next_workers %}
                 {% for worker in next_workers %}
-                    <li data-id="{{ worker.id }}">{{ worker.name }} (마지막 근무일: {{ worker.last_duty_date | default('없음') }})</li>
+                    <li data-id="{{ worker.id }}">
+                        {{ worker.name }}
+                        {% if worker.last_duty_date %}
+                            (마지막 근무일: {{ worker.last_duty_date }})
+                        {% else %}
+                            (마지막 근무일: 없음)
+                        {% endif %}
+                    </li>
                 {% endfor %}
             {% else %}
                 <li>근무 가능한 작업자가 없습니다.</li>
@@ -137,7 +141,7 @@
                         return;
                     }
 
-                    // 사용자에게 확인 메시지 표시 (커스텀 모달로 대체 권장)
+                    // IMPORTANT: For production, replace this 'confirm' with a custom modal UI.
                     if (!confirm('현재 표시된 근무자들의 근무를 기록하고 순번을 업데이트하시겠습니까?')) {
                         return;
                     }

@@ -3,22 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}뇌사XMatch알리미{% endblock %}</title>
+    <title>{% block title %}BD_XMatch_app{% endblock %}</title>
+    <!-- 모든 페이지에 공통으로 적용될 CSS 파일 (예: style.css)을 여기에 연결할 수 있습니다. -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- 필요하다면 공통 스타일을 여기에 추가 -->
+    <style>
+        /* 이 스타일은 static/css/style.css 파일로 옮기는 것을 권장합니다. */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        /* 기타 공통 스타일 */
+    </style>
+    {% block head %}{% endblock %} {# workers.html에서 추가 head 내용을 삽입할 수 있도록 block 추가 #}
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="{{ url_for('index') }}">홈</a> |
-            <a href="{{ url_for('workers') }}">근무자 관리</a>
-        </nav>
-    </header>
-    <main>
+    <div class="container">
         {% block content %}{% endblock %}
-    </main>
-    <footer>
-        <p>&copy; 2025 뇌사XMatch알리미</p>
-    </footer>
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    </div>
 </body>
 </html>
